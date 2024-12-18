@@ -1,0 +1,29 @@
+{
+    "dashboard": {
+        "id": null,
+        "title": "User Records API Metrics",
+        "panels": [
+            {
+                "type": "graph",
+                "title": "Request Count",
+                "targets": [
+                    {
+                        "expr": "request_count",
+                        "legendFormat": "{{method}} {{endpoint}} {{status}}"
+                    }
+                ]
+            },
+            {
+                "type": "graph",
+                "title": "Request Latency",
+                "targets": [
+                    {
+                        "expr": "rate(request_latency_seconds_sum[5m]) / rate(request_latency_seconds_count[5m])",
+                        "legendFormat": "{{method}} {{endpoint}}"
+                    }
+                ]
+            }
+        ]
+    },
+    "overwrite": true
+}
