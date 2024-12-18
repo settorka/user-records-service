@@ -1,10 +1,11 @@
 import time
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from prometheus_client import generate_latest
 from starlette.responses import Response
+from pydantic import BaseModel
 from .services import RecordService
 from .middleware import LoggingMiddleware
-from .metrics import record_metrics, REQUEST_COUNT, REQUEST_LATENCY
+from .metrics import record_metrics
 
 app = FastAPI()
 
@@ -14,9 +15,13 @@ app.add_middleware(LoggingMiddleware)
 # Initialize service
 record_service = RecordService()
 
+class UpdateRecordRequest(BaseModel):
+    """Pydantic model for updating the record."""
+    attributes: dict
+
 @app.get("/api/v1/record")
 async def get_record():
-    """Endpoint to get the record."""
+    """Endpoint to get the current record."""
     start_time = time.time()
     try:
         result = record_service.get_record()
@@ -26,15 +31,15 @@ async def get_record():
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         latency = time.time() - start_time
-        record_metrics(method="GET", endpoint="/record", status=status, latency=latency)
+        record_metrics(method="GET", endpoint="/api/v1/record", status=status, latency=latency)
     return result
 
 @app.put("/api/v1/record")
-async def update_record(name: str, age: int, country: str):
+async def update_record(request: UpdateRecordRequest):
     """Endpoint to update the record."""
     start_time = time.time()
     try:
-        result = record_service.update_record(name=name, age=age, country=country)
+        result = record_service.update_record(**request.attributes)
         status = "200"
     except ValueError as e:
         status = "400"
@@ -44,7 +49,7 @@ async def update_record(name: str, age: int, country: str):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         latency = time.time() - start_time
-        record_metrics(method="PUT", endpoint="/record", status=status, latency=latency)
+        record_metrics(method="PUT", endpoint="/api/v1/record", status=status, latency=latency)
     return result
 
 @app.get("/metrics")
