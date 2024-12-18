@@ -14,7 +14,7 @@ app.add_middleware(LoggingMiddleware)
 # Initialize service
 record_service = RecordService()
 
-@app.get("/record")
+@app.get("/api/v1/record")
 async def get_record():
     """Endpoint to get the record."""
     start_time = time.time()
@@ -29,7 +29,7 @@ async def get_record():
         record_metrics(method="GET", endpoint="/record", status=status, latency=latency)
     return result
 
-@app.put("/record")
+@app.put("/api/v1/record")
 async def update_record(name: str, age: int, country: str):
     """Endpoint to update the record."""
     start_time = time.time()

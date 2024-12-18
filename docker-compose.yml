@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ./api
+    ports:
+      - "${APP_PORT}:${APP_PORT}"  # Use APP_PORT from .env
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/logs
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"  # Use PROMETHEUS_PORT from .env
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT}:${GRAFANA_PORT}"  # Use GRAFANA_PORT from .env
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}  # Use GRAFANA_ADMIN_USER from .env
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}  # Use GRAFANA_ADMIN_PASSWORD from .env
